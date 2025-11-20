@@ -9,11 +9,9 @@ Este projeto implementa uma solução para análise de dados de redes sociais us
 ├── Instagram data.csv                    # Dados do Instagram (posts, hashtags, métricas)
 ├── criar_relacionamentos_aura_v2.cypher # Script Cypher para criar relacionamentos
 ├── criar_relacionamentos_aura_simples.cypher # Versão simplificada
-├── queries.py                           # Script Python para análises
 ├── consultas_cypher.txt                 # Consultas Cypher prontas para uso
 ├── INSTRUCOES_AURA.md                   # Instruções detalhadas para Neo4j Aura
 ├── imagens/                             # Screenshots dos resultados das consultas
-├── requirements.txt                     # Dependências Python
 └── README.md                            # Este arquivo
 ```
 
@@ -24,12 +22,6 @@ Este projeto implementa uma solução para análise de dados de redes sociais us
    - Crie uma nova instância de banco de dados
    - Anote a URI de conexão (formato: `neo4j+s://xxxxx.databases.neo4j.io`)
    - Anote o usuário e senha
-
-2. **Python 3.7+** (opcional, para scripts Python)
-   - Verifique a versão: `python --version`
-
-3. **Bibliotecas Python** (opcional)
-   - Instale as dependências: `pip install -r requirements.txt`
 
 ## 📦 Configuração Inicial
 
@@ -79,25 +71,9 @@ Execute os scripts Cypher em `criar_relacionamentos_aura_v2.cypher` ou siga as i
 
 ## 🔍 Executando Análises
 
-### Opção 1: Usando Neo4j Browser (Recomendado)
-
 Acesse o Neo4j Browser através do console do Aura e execute as consultas do arquivo `consultas_cypher.txt`.
 
-### Opção 2: Usando Script Python
-
-1. Configure as credenciais do Neo4j Aura no arquivo `queries.py`:
-```python
-URI = "neo4j+s://seu-instance.databases.neo4j.io"  # Sua URI do Aura
-USER = "neo4j"  # Seu usuário
-PASSWORD = "sua_senha_aqui"  # Sua senha
-```
-
-2. Execute o script:
-```bash
-python queries.py
-```
-
-Este script executa várias análises:
+As consultas disponíveis incluem:
 
 1. **Estatísticas Gerais**: Resumo da rede
 2. **Top Hashtags**: Hashtags mais utilizadas
@@ -315,19 +291,18 @@ LIMIT 20
 
 ## 🛠️ Personalização
 
-Você pode modificar os scripts para:
+Você pode modificar as consultas para:
 
-- **Adicionar mais análises**: Crie novos métodos em `queries.py` ou novas consultas Cypher
+- **Adicionar mais análises**: Crie novas consultas Cypher
 - **Filtrar dados**: Adicione condições WHERE nas consultas
 - **Visualizar grafos**: Use o Neo4j Browser para visualizar os relacionamentos graficamente
-- **Exportar resultados**: Adicione código para salvar resultados em CSV/JSON
+- **Exportar resultados**: Use a funcionalidade de exportação do Neo4j Browser
 
 ## 📚 Recursos Adicionais
 
 - [Neo4j Aura Documentation](https://neo4j.com/docs/aura/)
 - [Neo4j Browser Guide](https://neo4j.com/developer/neo4j-browser/)
 - [Cypher Query Language](https://neo4j.com/developer/cypher/)
-- [Neo4j Python Driver](https://neo4j.com/docs/python-manual/current/)
 
 ## ⚠️ Notas Importantes
 
@@ -336,17 +311,6 @@ Você pode modificar os scripts para:
 - **Relacionamentos**: Após importar, execute os scripts Cypher para criar relacionamentos
 - **Credenciais**: Mantenha suas credenciais do Aura seguras e não as compartilhe
 - **Limites**: A versão gratuita do Aura tem limites de uso
-
-## 🔐 Configuração de Segurança
-
-Ao usar scripts Python, nunca commite suas credenciais no Git. Use variáveis de ambiente:
-
-```python
-import os
-URI = os.getenv("NEO4J_URI")
-USER = os.getenv("NEO4J_USER")
-PASSWORD = os.getenv("NEO4J_PASSWORD")
-```
 
 ## 👨‍💻 Autor
 
