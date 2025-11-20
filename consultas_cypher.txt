@@ -1,0 +1,277 @@
+===============================================
+  CONSULTAS CYPHER PARA NEO4J AURA BROWSER
+===============================================
+Copie e cole estas consultas no Neo4j Browser do Aura
+Acesse através do console: https://console.neo4j.io/
+===============================================
+
+1. VISUALIZAR TODA A REDE (LIMITE DE 50 NÓS)
+-------------------------------------------------
+MATCH (h:Hashtag)-[r:USED_IN]->(p:InstagramPost)
+RETURN h, r, p
+LIMIT 50
+
+DICA: Mude para a aba "Graph" para visualização gráfica!
+
+-------------------------------------------------
+
+2. TOP 15 HASHTAGS MAIS UTILIZADAS
+-------------------------------------------------
+MATCH (h:Hashtag)-[:USED_IN]->(p:InstagramPost)
+RETURN h.name AS hashtag, count(p) AS total_posts
+ORDER BY total_posts DESC
+LIMIT 15
+
+-------------------------------------------------
+
+3. POSTS COM MAIOR ENGAJAMENTO (LIKES + COMMENTS + SHARES)
+-------------------------------------------------
+MATCH (p:InstagramPost)
+RETURN elementId(p) AS id_post,
+       p.like AS likes,
+       p.comment AS comments,
+       p.share AS shares,
+       (p.like + p.comment + p.share) AS engajamento_total,
+       p.caption AS legenda
+ORDER BY engajamento_total DESC
+LIMIT 10
+
+-------------------------------------------------
+
+4. HASHTAGS RELACIONADAS A "datascience" (CO-OCORRÊNCIA)
+-------------------------------------------------
+MATCH (h1:Hashtag {name: 'datascience'})-[r:RELATED_TO]-(h2:Hashtag)
+RETURN h2.name AS hashtag_relacionada, r.weight AS frequencia
+ORDER BY r.weight DESC
+LIMIT 10
+
+-------------------------------------------------
+
+5. POSTS QUE USAM UMA HASHTAG ESPECÍFICA (ex: "python")
+-------------------------------------------------
+MATCH (h:Hashtag {name: 'python'})-[:USED_IN]->(p:InstagramPost)
+RETURN elementId(p) AS id_post,
+       p.like AS likes,
+       p.comment AS comments,
+       p.impression AS impressoes,
+       p.caption AS legenda
+ORDER BY p.like DESC
+LIMIT 10
+
+-------------------------------------------------
+
+6. REDE DE HASHTAGS (VISUALIZAÇÃO GRÁFICA)
+-------------------------------------------------
+MATCH (h1:Hashtag)-[r:RELATED_TO]-(h2:Hashtag)
+WHERE r.weight >= 3
+RETURN h1, r, h2
+
+DICA: Mude para a aba "Graph" para ver a rede visualmente!
+
+-------------------------------------------------
+
+7. HASHTAGS COM MAIOR ENGAJAMENTO MÉDIO
+-------------------------------------------------
+MATCH (h:Hashtag)-[:USED_IN]->(p:InstagramPost)
+WITH h.name AS hashtag,
+     avg(p.like + p.comment + p.share) AS engajamento_medio,
+     count(p) AS total_posts
+WHERE total_posts >= 3
+RETURN hashtag, engajamento_medio, total_posts
+ORDER BY engajamento_medio DESC
+LIMIT 10
+
+-------------------------------------------------
+
+8. POSTS COM MAIS IMPRESSÕES
+-------------------------------------------------
+MATCH (p:InstagramPost)
+RETURN elementId(p) AS id_post,
+       p.impression AS total_impressoes,
+       p.fromHome AS da_home,
+       p.fromHashtag AS de_hashtags,
+       p.fromExplore AS do_explore,
+       p.caption AS legenda
+ORDER BY p.impression DESC
+LIMIT 10
+
+-------------------------------------------------
+
+9. ESTATÍSTICAS GERAIS DA REDE
+-------------------------------------------------
+MATCH (p:InstagramPost)
+WITH count(p) AS total_posts,
+     avg(p.like) AS media_likes,
+     avg(p.comment) AS media_comments,
+     avg(p.share) AS media_shares,
+     avg(p.impression) AS media_impressoes
+MATCH (h:Hashtag)
+WITH total_posts, media_likes, media_comments, media_shares,
+     media_impressoes, count(h) AS total_hashtags
+MATCH ()-[r:USED_IN]->()
+RETURN total_posts,
+       total_hashtags,
+       count(r) AS relacoes_post_hashtag,
+       round(media_likes) AS media_likes,
+       round(media_comments, 1) AS media_comments,
+       round(media_shares, 1) AS media_shares,
+       round(media_impressoes) AS media_impressoes
+
+-------------------------------------------------
+
+10. HASHTAGS QUE APARECEM JUNTAS MAIS FREQUENTEMENTE
+-------------------------------------------------
+MATCH (h1:Hashtag)-[r:RELATED_TO]-(h2:Hashtag)
+WHERE r.weight >= 5
+RETURN h1.name AS hashtag1,
+       h2.name AS hashtag2,
+       r.weight AS frequencia_coocorrencia
+ORDER BY r.weight DESC
+LIMIT 20
+
+-------------------------------------------------
+
+11. POSTS QUE CONTÊM MÚLTIPLAS HASHTAGS ESPECÍFICAS
+-------------------------------------------------
+MATCH (h1:Hashtag {name: 'python'})-[:USED_IN]->(p:InstagramPost)<-[:USED_IN]-(h2:Hashtag {name: 'datascience'})
+RETURN elementId(p) AS id_post,
+       p.like AS likes,
+       p.caption AS legenda
+ORDER BY p.like DESC
+
+-------------------------------------------------
+
+12. DISTRIBUIÇÃO DE ORIGEM DAS IMPRESSÕES
+-------------------------------------------------
+MATCH (p:InstagramPost)
+RETURN avg(p.fromHome) AS media_home,
+       avg(p.fromHashtag) AS media_hashtags,
+       avg(p.fromExplore) AS media_explore,
+       avg(p.fromOther) AS media_outros
+
+-------------------------------------------------
+
+13. HASHTAGS POR CATEGORIA (EXEMPLO: POSTS SOBRE "machinelearning")
+-------------------------------------------------
+MATCH (h:Hashtag {name: 'machinelearning'})-[:USED_IN]->(p:InstagramPost)<-[:USED_IN]-(h2:Hashtag)
+WHERE h2.name <> 'machinelearning'
+RETURN h2.name AS hashtags_relacionadas,
+       count(p) AS num_posts_comuns
+ORDER BY num_posts_comuns DESC
+LIMIT 15
+
+-------------------------------------------------
+
+14. CORRELAÇÃO ENTRE IMPRESSÕES DE HASHTAGS E LIKES
+-------------------------------------------------
+MATCH (h:Hashtag)-[:USED_IN]->(p:InstagramPost)
+WHERE p.fromHashtag > 0
+WITH h.name AS hashtag,
+     avg(p.fromHashtag) AS media_impressoes_hashtags,
+     avg(p.like) AS media_likes,
+     count(p) AS total_posts
+WHERE total_posts >= 5
+RETURN hashtag,
+       round(media_impressoes_hashtags) AS impressoes_media,
+       round(media_likes) AS likes_media,
+       total_posts
+ORDER BY media_likes DESC
+LIMIT 15
+
+-------------------------------------------------
+
+15. POSTS COM MAIS SALVAMENTOS (SAVES)
+-------------------------------------------------
+MATCH (p:InstagramPost)
+RETURN elementId(p) AS id_post,
+       p.save AS saves,
+       p.like AS likes,
+       p.caption AS legenda
+ORDER BY p.save DESC
+LIMIT 10
+
+-------------------------------------------------
+
+16. HASHTAGS QUE GERAM MAIS VISITAS AO PERFIL
+-------------------------------------------------
+MATCH (h:Hashtag)-[:USED_IN]->(p:InstagramPost)
+WHERE p.profileVisit > 0
+WITH h.name AS hashtag,
+     avg(p.profileVisit) AS media_visitas,
+     count(p) AS total_posts
+WHERE total_posts >= 3
+RETURN hashtag,
+       round(media_visitas) AS media_visitas_perfil,
+       total_posts
+ORDER BY media_visitas DESC
+LIMIT 10
+
+-------------------------------------------------
+
+17. POSTS COM MAIS NOVOS SEGUIDORES (FOLLOWS)
+-------------------------------------------------
+MATCH (p:InstagramPost)
+WHERE p.follow > 0
+RETURN elementId(p) AS id_post,
+       p.follow AS novos_seguidores,
+       p.like AS likes,
+       p.caption AS legenda
+ORDER BY p.follow DESC
+LIMIT 10
+
+-------------------------------------------------
+
+18. TOP HASHTAGS POR CATEGORIA DE ENGAJAMENTO
+-------------------------------------------------
+MATCH (h:Hashtag)-[:USED_IN]->(p:InstagramPost)
+WITH h.name AS hashtag,
+     avg(p.like) AS avg_likes,
+     avg(p.comment) AS avg_comments,
+     avg(p.share) AS avg_shares,
+     count(p) AS total_posts
+WHERE total_posts >= 5
+RETURN hashtag,
+       round(avg_likes) AS media_likes,
+       round(avg_comments, 1) AS media_comments,
+       round(avg_shares, 1) AS media_shares,
+       total_posts
+ORDER BY avg_likes DESC
+LIMIT 15
+
+-------------------------------------------------
+
+19. ANÁLISE DE PERFORMANCE POR ORIGEM DE IMPRESSÕES
+-------------------------------------------------
+MATCH (p:InstagramPost)
+RETURN 
+  avg(p.fromHome) AS media_home,
+  avg(p.fromHashtag) AS media_hashtags,
+  avg(p.fromExplore) AS media_explore,
+  avg(p.fromOther) AS media_outros,
+  avg(p.like) AS media_likes_geral,
+  count(p) AS total_posts
+
+-------------------------------------------------
+
+20. HASHTAGS MAIS EFICAZES (MAIOR TAXA DE CONVERSÃO)
+-------------------------------------------------
+MATCH (h:Hashtag)-[:USED_IN]->(p:InstagramPost)
+WHERE p.fromHashtag > 0 AND p.impression > 0
+WITH h.name AS hashtag,
+     avg(p.like * 100.0 / p.impression) AS taxa_engajamento,
+     avg(p.follow * 100.0 / p.profileVisit) AS taxa_conversao_seguidores,
+     count(p) AS total_posts
+WHERE total_posts >= 3 AND p.profileVisit > 0
+RETURN hashtag,
+       round(taxa_engajamento, 2) AS taxa_engajamento_pct,
+       round(taxa_conversao_seguidores, 2) AS taxa_conversao_pct,
+       total_posts
+ORDER BY taxa_engajamento DESC
+LIMIT 10
+
+-------------------------------------------------
+
+DICA: Use o Neo4j Browser do Aura para visualizar os resultados graficamente!
+Acesse através do console: https://console.neo4j.io/
+
+===============================================
